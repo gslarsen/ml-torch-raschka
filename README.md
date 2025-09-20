@@ -18,16 +18,16 @@ The project includes a Python environment check script to ensure all required de
 
 ### Prerequisites
 
-- Python 3.8 or newer
+- Python 3.9
 - Virtual environment (recommended)
 
 ### Required Packages
 
-- numpy >= 1.21.2
-- scipy >= 1.7.0
-- matplotlib >= 3.4.3
-- scikit-learn >= 1.0
-- pandas >= 1.3.2
+- numpy = 1.21.2
+- scipy = 1.7.0
+- matplotlib = 3.4.3
+- scikit-learn = 1.0
+- pandas = 1.3.2
 - PyTorch (will be added as we progress)
 
 ### Environment Check
