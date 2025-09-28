@@ -1,0 +1,76 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath, amssymb, bm}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+
+\title{Notational Conventions (Corrected)}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+Unless noted otherwise, we use a superscript $i$ to denote the $i$th training example (row of the dataset) and a subscript $j$ to denote the $j$th feature (column of the dataset). Lowercase boldface letters denote vectors ($\bm{x} \in \mathbb{R}^{n \times 1}$). In other words, $\bm{x}$ is a column vector with $n$ components, each of which is a real number. Uppercase boldface letters denote matrices ($\bm{X} \in \mathbb{R}^{n \times m}$). Single elements are written in italics, e.g.\ $x^{(i)}$ or $x^{(i)}_j$.
+
+\section*{Dataset, Rows (Samples), and Columns (Features)}
+Let the dataset matrix be
+\begin{equation*}
+  \bm{X} \in \mathbb{R}^{150 \times 4},
+\end{equation*}
+where each of the $150$ rows is a flower instance and the $4$ columns are the features (e.g., sepal length, sepal width, petal length, petal width).
+
+\paragraph{Row (sample) vector.}
+The $i$th training example (the $i$th row of $\bm{X}$) is the row vector
+\begin{equation*}
+  \bm{x}^{(i)} \;=\; \begin{bmatrix} x^{(i)}_1 & x^{(i)}_2 & x^{(i)}_3 & x^{(i)}_4 \end{bmatrix}
+  \;\in\; \mathbb{R}^{1 \times 4}.
+\end{equation*}
+
+\paragraph{Column (feature) vector.}
+The $j$th feature across all examples (the $j$th column of $\bm{X}$) is the column vector
+\begin{equation*}
+  \bm{x}_{j} \;=\; \begin{bmatrix}
+    x^{(1)}_{j} \\[2pt]
+    x^{(2)}_{j} \\
+    \vdots \\
+    x^{(150)}_{j}
+  \end{bmatrix}
+  \;\in\; \mathbb{R}^{150 \times 1}.
+\end{equation*}
+
+\paragraph{Individual entry.}
+The scalar $x^{(i)}_j$ denotes ``feature $j$ of training example $i$''. For instance, $x^{(150)}_1$ is the first feature (sepal length) of the $150$th example.
+
+\section*{Targets / Labels}
+The target variables (class labels) can be assembled into the column vector
+\begin{equation*}
+  \bm{y} \;=\; \begin{bmatrix}
+    y^{(1)} \\
+    y^{(2)} \\
+    \vdots \\
+    y^{(150)}
+  \end{bmatrix},
+  \qquad
+  \text{where } y^{(i)} \in \{\text{Setosa}, \text{Versicolor}, \text{Virginica}\}.
+\end{equation*}
+
+\section*{Quick Reference}
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Object & Type / Shape & Meaning \\
+\midrule
+$\bm{X}$ & $150 \times 4$ matrix & Entire dataset \\
+$\bm{x}^{(i)}$ & $1 \times 4$ row vector & Sample $i$ (features for one example) \\
+$\bm{x}_j$ & $150 \times 1$ column vector & Feature $j$ across all examples \\
+$x^{(i)}_j$ & scalar & Entry at row $i$, column $j$ \\
+$\bm{y}$ & $150 \times 1$ column vector & Class labels \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}
