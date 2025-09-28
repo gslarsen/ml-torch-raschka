@@ -6,12 +6,34 @@
     <title>Interactive Vector Operations</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.155.0/build/three.module.js"
+        }
+      }
+    </script>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
     <!-- Chosen Palette: Slate Gray Neutrals with Indigo and Teal Accents -->
-    <!-- Application Structure Plan: The application is designed as a single-page interactive laboratory. A fixed sidebar on the left serves as a persistent control panel and navigation hub. It contains sliders for real-time manipulation of two vectors (v and w), dynamic readouts for their magnitude and angle, and navigation links to jump to specific operation sections. The main content area on the right uses a two-column grid for each operation: the left column shows the algebraic formulas with dynamically updated values, and the right contains a live Chart.js visualization. This structure was chosen to create a powerful, instantaneous feedback loop where user actions (moving a slider) immediately reflect across all algebraic and geometric representations, fostering a deep and intuitive understanding of the vector concepts. -->
+    <!-- Application Structure Plan: The application is designed as a single-page interactive laboratory. A fixed sidebar on the left serves as a persistent control panel and             {
+              data: [
+                { x: vectorV.x, y: vectorV.y },
+                { x: proj.x, y: proj.y }
+              ],
+              borderColor: "#000000", // Black - maximum contrast
+              backgroundColor: "#000000",
+              borderWidth: 6, // Even thicker
+              pointRadius: 0, // No dots
+              pointBackgroundColor: "#000000",
+              borderDash: [], // Solid line instead of dashed
+              showArrow: false,
+              fill: false,
+              showLine: true,
+              tension: 0,
+            },It contains sliders for real-time manipulation of two vectors (v and w), dynamic readouts for their magnitude and angle, and navigation links to jump to specific operation sections. The main content area on the right uses a two-column grid for each operation: the left column shows the algebraic formulas with dynamically updated values, and the right contains a live Chart.js visualization. This structure was chosen to create a powerful, instantaneous feedback loop where user actions (moving a slider) immediately reflect across all algebraic and geometric representations, fostering a deep and intuitive understanding of the vector concepts. -->
     <!-- Visualization & Content Choices:
     - Vector Manipulation: Goal is to provide full user control. HTML range sliders are used for x/y components of each vector. JavaScript event listeners on these sliders trigger a global update function.
     - Live Data Readouts: Goal is to connect geometry to numbers. The sidebar displays vector Magnitude (sqrt(x^2+y^2)) and Angle (atan2(y,x)), calculated and updated in real-time.
@@ -141,7 +163,7 @@
           <div class="space-y-4 text-sm">
             <!-- Vector v Controls -->
             <div class="p-3 bg-slate-700 rounded-lg">
-              <label class="font-bold text-base text-indigo-300"
+              <label class="font-bold text-base text-red-400"
                 >Vector v = (<span id="vx-val-display">2</span>,
                 <span id="vy-val-display">4</span>)</label
               >
@@ -178,7 +200,7 @@
             </div>
             <!-- Vector w Controls -->
             <div class="p-3 bg-slate-700 rounded-lg">
-              <label class="font-bold text-base text-teal-300"
+              <label class="font-bold text-base text-green-400"
                 >Vector w = (<span id="wx-val-display">5</span>,
                 <span id="wy-val-display">1</span>)</label
               >
@@ -276,8 +298,10 @@
           </h3>
           <p class="mb-6">
             Subtracting a vector is the same as adding its inverse (a vector of the same magnitude
-            but opposite direction). The resultant vector `v - w` can be visualized as the vector
-            that connects the tip of `w` to the tip of `v`.
+            but opposite direction). The resultant vector
+            <strong><em>v</em> - <em>w</em></strong> can be visualized as the vector that connects
+            the tip of <strong><em>w</em></strong> to the tip of <strong><em>v</em></strong
+            >.
           </p>
           <div class="grid md:grid-cols-2 gap-8 items-center">
             <div class="bg-white p-6 rounded-lg shadow-md">
@@ -304,7 +328,7 @@
           <p class="mb-6">
             Multiplying a vector by a scalar (a single number) scales its magnitude. A positive
             scalar preserves direction, while a negative scalar reverses it. The chart shows vector
-            `v` scaled by constants 2 and -1.5.
+            <strong><em>v</em></strong> scaled by constants 2 and -1.5.
           </p>
           <div class="grid md:grid-cols-2 gap-8 items-center">
             <div class="bg-white p-6 rounded-lg shadow-md">
@@ -334,7 +358,14 @@
             The dot product results in a scalar, not a vector. It measures the degree to which two
             vectors point in the same direction. A positive result means they point similarly, zero
             means they're perpendicular, and negative means they point oppositely. The visualization
-            shows the projection of `v` onto `w`, which is the geometric basis of the dot product.
+            shows the projection of <strong><em>v</em></strong> onto <strong><em>w</em></strong
+            >, which is the geometric basis of the dot product. The blue dashed arrow represents the
+            projection (parallel component), while the gray dashed line shows the perpendicular
+            component, together forming a right triangle that decomposes vector
+            <strong><em>v</em></strong
+            >. The scalar result relates to the length of the blue projection multiplied by the
+            length of <strong><em>w</em></strong
+            >.
           </p>
           <div class="grid md:grid-cols-2 gap-8 items-center">
             <div class="bg-white p-6 rounded-lg shadow-md">
@@ -363,8 +394,9 @@
           </h3>
           <p class="mb-4">
             The cross product is defined in 3D and produces a new vector perpendicular to the plane
-            of the first two. Though we can't draw the 3D result, we can calculate it by treating
-            our 2D vectors as if they are on the XY-plane in 3D space (`v = (v_x, v_y, 0)`).
+            of the first two. Below you can see the 3D visualization showing how the cross product
+            vector emerges perpendicular to both input vectors when we treat our 2D vectors as 3D
+            vectors on the XY-plane (<strong><em>v</em></strong> = (v_x, v_y, 0)).
           </p>
           <div class="bg-white p-6 rounded-lg shadow-md">
             <h4 class="font-bold text-lg mb-2">Conceptual Meaning</h4>
@@ -375,14 +407,16 @@
               </li>
               <li>
                 <strong>Magnitude:</strong> The length of the resultant vector equals the area of
-                the parallelogram formed by `v` and `w`.
+                the parallelogram formed by <strong><em>v</em></strong> and
+                <strong><em>w</em></strong
+                >.
               </li>
             </ul>
             <div class="mt-4 pt-4 border-t">
               <h4 class="font-bold text-lg mb-2">Algebraic Result (in 3D)</h4>
-              <p class="font-mono text-slate-600 mb-4">z-component = v_x*w_y - v_y*w_x</p>
+              <p class="font-mono text-slate-600 mb-4">z-component = v_x * w_y - v_y * w_x</p>
               <p class="font-mono text-lg">
-                z = (<span class="vx-val">2</span>*<span class="wy-val">1</span>) - (<span
+                z = (<span class="vx-val">2</span> * <span class="wy-val">1</span>) - (<span
                   class="vy-val"
                   >4</span
                 >*<span class="wx-val">5</span>) = <span id="cross-calc">2 - 20 = -18</span>
@@ -392,11 +426,31 @@
               </p>
             </div>
           </div>
+
+          <!-- 3D Cross Product Visualization -->
+          <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+            <h4 class="font-bold text-lg mb-4">Cross Product</h4>
+            <div class="chart-container">
+              <canvas
+                id="crossProduct3D"
+                class="w-full h-full border border-slate-200 rounded"
+              ></canvas>
+            </div>
+            <p class="text-sm mt-2">
+              <strong style="color: #ff0000">Red:</strong> Vector v (<span class="vx-val">2</span>,
+              <span class="vy-val">4</span>), <strong style="color: #00aa00">Green:</strong> Vector
+              w (<span class="wx-val">5</span>, <span class="wy-val">1</span>),
+              <strong style="color: #0000ff">Blue:</strong> Cross product (v × w) =
+              <span id="cross-result-3d">(0, 0, -18)</span>
+            </p>
+          </div>
         </section>
       </main>
     </div>
 
-    <script>
+    <script type="module">
+      import * as THREE from "three";
+
       document.addEventListener("DOMContentLoaded", () => {
         const arrowheadPlugin = {
           id: "arrowhead",
@@ -464,6 +518,169 @@
         let vectorV = { x: 2, y: 4 };
         let vectorW = { x: 5, y: 1 };
 
+        // 3D Cross Product Visualization Setup
+        let scene, camera, renderer, vectorVMesh, vectorWMesh, crossProductMesh;
+
+        function setup3D() {
+          try {
+            const canvas = document.getElementById("crossProduct3D");
+            const container = canvas.parentElement;
+
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8fafc);
+
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+            camera.position.set(8, 6, 8);
+            camera.lookAt(0, 0, 0);
+
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 10, 5);
+            scene.add(directionalLight);
+
+            // Grid and axes
+            const gridHelper = new THREE.GridHelper(20, 20, 0xccccc, 0xeeeee);
+            scene.add(gridHelper);
+
+            const axesHelper = new THREE.AxesHelper(8);
+            scene.add(axesHelper);
+
+            // Vector materials - using MeshBasicMaterial for guaranteed colors
+            const vectorVMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // bright red
+            const vectorWMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // bright green
+            const crossMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // bright blue
+
+            // Create vector arrows (will be updated in update3D)
+            vectorVMesh = createArrow(vectorVMaterial);
+            vectorWMesh = createArrow(vectorWMaterial);
+            crossProductMesh = createArrow(crossMaterial);
+
+            scene.add(vectorVMesh);
+            scene.add(vectorWMesh);
+            scene.add(crossProductMesh);
+
+            // Mouse controls for rotation
+            let isMouseDown = false;
+            let mouseX = 0,
+              mouseY = 0;
+
+            canvas.addEventListener("mousedown", (e) => {
+              isMouseDown = true;
+              mouseX = e.clientX;
+              mouseY = e.clientY;
+            });
+
+            canvas.addEventListener("mousemove", (e) => {
+              if (!isMouseDown) return;
+
+              const deltaX = e.clientX - mouseX;
+              const deltaY = e.clientY - mouseY;
+
+              const spherical = new THREE.Spherical();
+              spherical.setFromVector3(camera.position);
+              spherical.theta -= deltaX * 0.01;
+              spherical.phi += deltaY * 0.01;
+              spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+
+              camera.position.setFromSpherical(spherical);
+              camera.lookAt(0, 0, 0);
+
+              mouseX = e.clientX;
+              mouseY = e.clientY;
+            });
+
+            canvas.addEventListener("mouseup", () => {
+              isMouseDown = false;
+            });
+
+            // Handle window resize
+            window.addEventListener("resize", () => {
+              const newWidth = container.clientWidth;
+              const newHeight = container.clientHeight;
+              camera.aspect = newWidth / newHeight;
+              camera.updateProjectionMatrix();
+              renderer.setSize(newWidth, newHeight);
+            });
+
+            update3D();
+          } catch (error) {
+            console.error("Error setting up 3D scene:", error);
+            console.error("THREE object:", THREE);
+          }
+        }
+
+        function createArrow(material) {
+          const group = new THREE.Group();
+
+          // Arrow shaft (cylinder) - initially 1 unit tall, centered at origin
+          const shaftGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1, 8);
+          const shaft = new THREE.Mesh(shaftGeometry, material);
+          shaft.position.y = 0.5; // Move up so bottom is at origin
+          group.add(shaft);
+
+          // Arrow head (cone)
+          const headGeometry = new THREE.ConeGeometry(0.15, 0.3, 8);
+          const head = new THREE.Mesh(headGeometry, material);
+          head.position.y = 1.15; // Position at top of shaft
+          group.add(head);
+
+          return group;
+        }
+
+        function update3D() {
+          if (!renderer) return;
+
+          // Calculate cross product (v × w)
+          const crossZ = vectorV.x * vectorW.y - vectorV.y * vectorW.x;
+
+          // Map 2D vectors to 3D: (x,y) -> (y,0,x) to match visual expectation
+          // This puts vectors flat on the XZ-plane with correct proportions
+
+          // Update vector V (red) - lies in XZ plane (y=0)
+          updateArrow(vectorVMesh, vectorV.y, 0, vectorV.x);
+
+          // Update vector W (green) - lies in XZ plane (y=0)
+          updateArrow(vectorWMesh, vectorW.y, 0, vectorW.x); // Update cross product (blue) - points along Y axis (vertical)
+          updateArrow(crossProductMesh, 0, crossZ, 0);
+
+          // Render the scene
+          renderer.render(scene, camera);
+        }
+        function updateArrow(arrowGroup, x, y, z) {
+          const length = Math.sqrt(x * x + y * y + z * z);
+
+          if (length < 0.1) {
+            arrowGroup.visible = false;
+            return;
+          }
+
+          arrowGroup.visible = true;
+
+          // Reset transforms
+          arrowGroup.position.set(0, 0, 0);
+          arrowGroup.rotation.set(0, 0, 0);
+          arrowGroup.scale.set(1, 1, 1);
+
+          // Scale the entire arrow to match vector length with better visibility
+          const scale = Math.max(0.5, length * 0.8); // Scale factor for better visibility
+          arrowGroup.scale.set(1, scale, 1);
+
+          // Create direction vector and align arrow
+          const direction = new THREE.Vector3(x, y, z).normalize();
+
+          // Default arrow points up (0, 1, 0), we want it to point in direction
+          const up = new THREE.Vector3(0, 1, 0);
+          const quaternion = new THREE.Quaternion().setFromUnitVectors(up, direction);
+          arrowGroup.setRotationFromQuaternion(quaternion);
+        }
         const createVectorDataset = (vector, color, from = { x: 0, y: 0 }, borderDash = []) => ({
           data: [
             { x: from.x, y: from.y },
@@ -498,6 +715,7 @@
         function updatePage() {
           updateCalculations();
           updateCharts();
+          update3D();
         }
 
         function updateCalculations() {
@@ -552,26 +770,31 @@
           const p2 = vectorV.y * vectorW.x;
           document.getElementById("cross-calc").textContent = `${f(p1)} - (${f(p2)}) = ${f(cross)}`;
           document.getElementById("cross-result").textContent = `(0, 0, ${f(cross)})`;
+
+          // Update 3D cross product result to match algebraic convention (3rd component)
+          if (document.getElementById("cross-result-3d")) {
+            document.getElementById("cross-result-3d").textContent = `(0, 0, ${f(cross)})`;
+          }
         }
 
         function updateCharts() {
           // Addition Chart
           const vPlusW = { x: vectorV.x + vectorW.x, y: vectorV.y + vectorW.y };
           charts.addition.data.datasets = [
-            createVectorDataset(vectorV, "#a5b4fc", vectorW, [5, 5]),
-            createVectorDataset(vectorW, "#6ee7b7", vectorV, [5, 5]),
-            createVectorDataset(vectorV, "#4f46e5"),
-            createVectorDataset(vectorW, "#14b8a6"),
-            createVectorDataset(vPlusW, "#be185d"),
+            createVectorDataset(vectorV, "#fca5a5", vectorW, [5, 5]),
+            createVectorDataset(vectorW, "#86efac", vectorV, [5, 5]),
+            createVectorDataset(vectorV, "#ef4444"),
+            createVectorDataset(vectorW, "#10b981"),
+            createVectorDataset(vPlusW, "#3b82f6"),
           ];
           charts.addition.update();
 
           // Subtraction Chart
           const vMinusW = { x: vectorV.x - vectorW.x, y: vectorV.y - vectorW.y };
           charts.subtraction.data.datasets = [
-            createVectorDataset(vectorV, "#4f46e5"),
-            createVectorDataset(vectorW, "#14b8a6"),
-            createVectorDataset(vMinusW, "#be185d", vectorW),
+            createVectorDataset(vectorV, "#ef4444"),
+            createVectorDataset(vectorW, "#10b981"),
+            createVectorDataset(vMinusW, "#3b82f6", vectorW),
           ];
           charts.subtraction.update();
 
@@ -579,9 +802,9 @@
           const scalar2v = { x: vectorV.x * 2, y: vectorV.y * 2 };
           const scalarNegV = { x: vectorV.x * -1.5, y: vectorV.y * -1.5 };
           charts.scalar.data.datasets = [
-            createVectorDataset(vectorV, "#a5b4fc", { x: 0, y: 0 }, [5, 5]),
-            createVectorDataset(scalar2v, "#14b8a6"),
-            createVectorDataset(scalarNegV, "#be185d"),
+            createVectorDataset(vectorV, "#fca5a5", { x: 0, y: 0 }, [5, 5]),
+            createVectorDataset(scalar2v, "#3b82f6"),
+            createVectorDataset(scalarNegV, "#6366f1"),
           ];
           charts.scalar.update();
 
@@ -591,27 +814,66 @@
           const projScalar = wMagSq === 0 ? 0 : dot / wMagSq;
           const proj = { x: vectorW.x * projScalar, y: vectorW.y * projScalar };
           charts.dot.data.datasets = [
-            createVectorDataset(vectorV, "#4f46e5"),
-            createVectorDataset(vectorW, "#14b8a6"),
+            // Vector V (red) - no dots
             {
-              ...createVectorDataset(proj, "#f472b6", { x: 0, y: 0 }),
-              showArrow: true,
-              borderWidth: 2,
-              borderDash: [6, 3],
-            },
-            {
-              data: [vectorV, proj],
-              borderColor: "#9ca3af",
-              borderWidth: 1.5,
+              data: [
+                { x: 0, y: 0 },
+                { x: vectorV.x, y: vectorV.y },
+              ],
+              borderColor: "#ef4444",
+              borderWidth: 3,
               pointRadius: 0,
-              borderDash: [2, 2],
+              showArrow: true,
+              showLine: true,
+              fill: false,
+            },
+            // Vector W (green) - no dots
+            {
+              data: [
+                { x: 0, y: 0 },
+                { x: vectorW.x, y: vectorW.y },
+              ],
+              borderColor: "#10b981",
+              borderWidth: 3,
+              pointRadius: 0,
+              showArrow: true,
+              showLine: true,
+              fill: false,
+            },
+            // Projection (blue dashed) - no dots
+            {
+              data: [
+                { x: 0, y: 0 },
+                { x: proj.x, y: proj.y },
+              ],
+              borderColor: "#0066ff",
+              borderWidth: 5,
+              pointRadius: 0,
+              borderDash: [10, 5],
+              showArrow: true,
+              showLine: true,
+              fill: false,
+            },
+            // Perpendicular drop (gray dashed) - no dots
+            {
+              data: [
+                { x: vectorV.x, y: vectorV.y },
+                { x: proj.x, y: proj.y },
+              ],
+              borderColor: "#6b7280",
+              borderWidth: 3,
+              pointRadius: 0,
+              borderDash: [6, 6],
               showArrow: false,
+              showLine: true,
+              fill: false,
             },
           ];
           charts.dot.update();
         }
 
         createCharts();
+        setup3D();
         updatePage();
 
         ["vx", "vy", "wx", "wy"].forEach((id) => {
