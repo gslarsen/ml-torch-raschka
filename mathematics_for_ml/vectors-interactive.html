@@ -17,35 +17,32 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <!-- Chosen Palette: Slate Gray Neutrals with Indigo and Teal Accents -->
-    <!-- Application Structure Plan: The application is designed as a single-page interactive laboratory. A fixed sidebar on the left serves as a persistent control panel and             {
-              data: [
-                { x: vectorV.x, y: vectorV.y },
-                { x: proj.x, y: proj.y }
-              ],
-              borderColor: "#000000", // Black - maximum contrast
-              backgroundColor: "#000000",
-              borderWidth: 6, // Even thicker
-              pointRadius: 0, // No dots
-              pointBackgroundColor: "#000000",
-              borderDash: [], // Solid line instead of dashed
-              showArrow: false,
-              fill: false,
-              showLine: true,
-              tension: 0,
-            },It contains sliders for real-time manipulation of two vectors (v and w), dynamic readouts for their magnitude and angle, and navigation links to jump to specific operation sections. The main content area on the right uses a two-column grid for each operation: the left column shows the algebraic formulas with dynamically updated values, and the right contains a live Chart.js visualization. This structure was chosen to create a powerful, instantaneous feedback loop where user actions (moving a slider) immediately reflect across all algebraic and geometric representations, fostering a deep and intuitive understanding of the vector concepts. -->
-    <!-- Visualization & Content Choices:
-    - Vector Manipulation: Goal is to provide full user control. HTML range sliders are used for x/y components of each vector. JavaScript event listeners on these sliders trigger a global update function.
-    - Live Data Readouts: Goal is to connect geometry to numbers. The sidebar displays vector Magnitude (sqrt(x^2+y^2)) and Angle (atan2(y,x)), calculated and updated in real-time.
-    - Vector Operations (Addition, Subtraction, etc.): Goal is to dynamically visualize the results of operations. Chart.js scatter plots are used for all visualizations. When sliders are adjusted, the datasets for each chart are recalculated and redrawn instantly, showing how the resultant vectors change.
-    - Dot/Cross Products: The dot product's projection visualization and the cross product's scalar result (z-component) are also updated in real-time, providing immediate insight into how vector orientation affects these products.
-    All visualizations are rendered on a Canvas using Chart.js, confirming no SVG is used. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- Interactive Vector Operations Laboratory -->
+    <!--
+    Application Structure: Single-page interactive laboratory with:
+    - Fixed sidebar: Control panel with vector sliders, magnitude/angle readouts, and navigation
+    - Main content: Two-column grid showing algebraic formulas and live Chart.js visualizations
+    - Real-time feedback: Slider changes instantly update all mathematical and geometric representations
+    -->
+    <!--
+    Implementation Details:
+    - Vector Controls: HTML range sliders with JavaScript event listeners for real-time updates
+    - Visualizations: Chart.js scatter plots (no SVG/Mermaid) with custom arrowhead plugin
+    - 3D Cross Product: Three.js WebGL rendering with mouse orbit controls
+    - Mathematical Notation: HTML-based bold italic vectors with live value updates
+    -->
     <style>
       body {
         font-family: "Inter", sans-serif;
         background-color: #f8fafc;
       }
+
+      /* Navigation active state */
+      .nav-link.active {
+        background-color: #4f46e5 !important; /* Indigo-600 to match reset button */
+        color: white !important;
+      }
+
       .chart-container {
         position: relative;
         width: 100%;
@@ -61,10 +58,6 @@
       }
       html {
         scroll-behavior: smooth;
-      }
-      .nav-link.active {
-        background-color: #4f46e5;
-        color: white;
       }
       input[type="range"] {
         -webkit-appearance: none;
@@ -235,6 +228,14 @@
                 </div>
               </div>
             </div>
+
+            <!-- Reset Button -->
+            <button
+              id="reset-button"
+              class="w-full mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+            >
+              Reset
+            </button>
           </div>
         </div>
       </aside>
@@ -388,7 +389,7 @@
           </div>
         </section>
 
-        <section id="cross" class="scroll-mt-20">
+        <section id="cross" class="mb-16 scroll-mt-20">
           <h3 class="text-2xl font-bold text-slate-900 border-b-2 border-indigo-200 pb-2 mb-4">
             Cross Product (v × w)
           </h3>
@@ -495,28 +496,11 @@
 
         Chart.register(arrowheadPlugin);
 
-        const commonChartOptions = {
-          type: "scatter",
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: { grid: { color: "#e2e8f0" }, ticks: { color: "#64748b" }, min: -15, max: 15 },
-              y: { grid: { color: "#e2e8f0" }, ticks: { color: "#64748b" }, min: -15, max: 15 },
-            },
-            plugins: {
-              legend: { display: false },
-              tooltip: { enabled: false },
-            },
-            elements: { line: { tension: 0 } },
-            showLine: true,
-            animation: { duration: 0 },
-          },
-        };
-
-        let charts = {};
         let vectorV = { x: 2, y: 4 };
         let vectorW = { x: 5, y: 1 };
+
+        // Initialize ChartManager
+        let chartManager;
 
         // 3D Cross Product Visualization Setup
         let scene, camera, renderer, vectorVMesh, vectorWMesh, crossProductMesh;
@@ -673,48 +657,188 @@
           const scale = Math.max(0.5, length * 0.8); // Scale factor for better visibility
           arrowGroup.scale.set(1, scale, 1);
 
-          // Create direction vector and align arrow
+          // Position and orient the arrow
           const direction = new THREE.Vector3(x, y, z).normalize();
-
-          // Default arrow points up (0, 1, 0), we want it to point in direction
-          const up = new THREE.Vector3(0, 1, 0);
-          const quaternion = new THREE.Quaternion().setFromUnitVectors(up, direction);
-          arrowGroup.setRotationFromQuaternion(quaternion);
+          arrowGroup.lookAt(direction);
+          arrowGroup.rotateX(Math.PI / 2); // Adjust for cylinder orientation
         }
-        const createVectorDataset = (vector, color, from = { x: 0, y: 0 }, borderDash = []) => ({
-          data: [
-            { x: from.x, y: from.y },
-            { x: vector.x + from.x, y: vector.y + from.y },
-          ],
-          borderColor: color,
-          borderWidth: 3,
-          pointRadius: 0,
-          borderDash: borderDash,
-          showArrow: borderDash.length === 0,
-        });
 
-        function createCharts() {
-          charts.addition = new Chart(
-            document.getElementById("additionChart"),
-            JSON.parse(JSON.stringify(commonChartOptions))
-          );
-          charts.subtraction = new Chart(
-            document.getElementById("subtractionChart"),
-            JSON.parse(JSON.stringify(commonChartOptions))
-          );
-          charts.scalar = new Chart(
-            document.getElementById("scalarChart"),
-            JSON.parse(JSON.stringify(commonChartOptions))
-          );
-          charts.dot = new Chart(
-            document.getElementById("dotProductChart"),
-            JSON.parse(JSON.stringify(commonChartOptions))
-          );
+        // Clean Chart Management System
+        class ChartManager {
+          constructor() {
+            this.charts = {};
+            this.commonOptions = {
+              type: "scatter",
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: { grid: { color: "#e2e8f0" }, ticks: { color: "#64748b" }, min: -15, max: 15 },
+                  y: { grid: { color: "#e2e8f0" }, ticks: { color: "#64748b" }, min: -15, max: 15 },
+                },
+                plugins: {
+                  legend: { display: false },
+                  tooltip: { enabled: false },
+                },
+                elements: { line: { tension: 0 } },
+                showLine: true,
+                animation: { duration: 0 },
+              },
+            };
+
+            this.init();
+          }
+
+          init() {
+            this.createCharts();
+          }
+
+          // Create vector dataset with consistent formatting
+          createVectorDataset(vector, color, from = { x: 0, y: 0 }, borderDash = []) {
+            return {
+              data: [
+                { x: from.x, y: from.y },
+                { x: vector.x + from.x, y: vector.y + from.y },
+              ],
+              borderColor: color,
+              borderWidth: 3,
+              pointRadius: 0,
+              borderDash: borderDash,
+              showArrow: borderDash.length === 0,
+            };
+          }
+
+          // Create all charts with common configuration
+          createCharts() {
+            const chartIds = [
+              "additionChart",
+              "subtractionChart",
+              "scalarChart",
+              "dotProductChart",
+            ];
+            const chartKeys = ["addition", "subtraction", "scalar", "dot"];
+
+            chartIds.forEach((id, index) => {
+              this.charts[chartKeys[index]] = new Chart(
+                document.getElementById(id),
+                structuredClone(this.commonOptions)
+              );
+            });
+          }
+
+          // Update all charts with current vector values
+          updateCharts(vectorV, vectorW) {
+            this.updateAdditionChart(vectorV, vectorW);
+            this.updateSubtractionChart(vectorV, vectorW);
+            this.updateScalarChart(vectorV);
+            this.updateDotProductChart(vectorV, vectorW);
+          }
+
+          updateAdditionChart(vectorV, vectorW) {
+            const vPlusW = { x: vectorV.x + vectorW.x, y: vectorV.y + vectorW.y };
+            this.charts.addition.data.datasets = [
+              this.createVectorDataset(vectorW, "#86efac", vectorV, [5, 5]),
+              this.createVectorDataset(vectorV, "#ef4444"),
+              this.createVectorDataset(vectorW, "#10b981"),
+              this.createVectorDataset(vPlusW, "#3b82f6"),
+            ];
+            this.charts.addition.update();
+          }
+
+          updateSubtractionChart(vectorV, vectorW) {
+            const vMinusW = { x: vectorV.x - vectorW.x, y: vectorV.y - vectorW.y };
+            this.charts.subtraction.data.datasets = [
+              this.createVectorDataset(vectorV, "#ef4444"),
+              this.createVectorDataset(vectorW, "#10b981"),
+              this.createVectorDataset(vMinusW, "#3b82f6", vectorW),
+            ];
+            this.charts.subtraction.update();
+          }
+
+          updateScalarChart(vectorV) {
+            const scalar2v = { x: vectorV.x * 2, y: vectorV.y * 2 };
+            const scalarNegV = { x: vectorV.x * -1.5, y: vectorV.y * -1.5 };
+            this.charts.scalar.data.datasets = [
+              this.createVectorDataset(vectorV, "#fca5a5", { x: 0, y: 0 }, [5, 5]),
+              this.createVectorDataset(scalar2v, "#3b82f6"),
+              this.createVectorDataset(scalarNegV, "#6366f1"),
+            ];
+            this.charts.scalar.update();
+          }
+
+          updateDotProductChart(vectorV, vectorW) {
+            const dot = vectorV.x * vectorW.x + vectorV.y * vectorW.y;
+            const wMagSq = vectorW.x ** 2 + vectorW.y ** 2;
+            const projScalar = wMagSq === 0 ? 0 : dot / wMagSq;
+            const proj = { x: vectorW.x * projScalar, y: vectorW.y * projScalar };
+
+            this.charts.dot.data.datasets = [
+              // Vector V (red)
+              {
+                data: [
+                  { x: 0, y: 0 },
+                  { x: vectorV.x, y: vectorV.y },
+                ],
+                borderColor: "#ef4444",
+                borderWidth: 3,
+                pointRadius: 0,
+                showArrow: true,
+                showLine: true,
+                fill: false,
+              },
+              // Vector W (green)
+              {
+                data: [
+                  { x: 0, y: 0 },
+                  { x: vectorW.x, y: vectorW.y },
+                ],
+                borderColor: "#10b981",
+                borderWidth: 3,
+                pointRadius: 0,
+                showArrow: true,
+                showLine: true,
+                fill: false,
+              },
+              // Projection (blue)
+              {
+                data: [
+                  { x: vectorV.x, y: vectorV.y },
+                  { x: proj.x, y: proj.y },
+                ],
+                borderColor: "#3b82f6",
+                backgroundColor: "#3b82f6",
+                borderWidth: 6,
+                pointRadius: 0,
+                borderDash: [],
+                showArrow: false,
+                fill: false,
+                showLine: true,
+                tension: 0,
+              },
+              // Perpendicular line (gray)
+              {
+                data: [
+                  { x: vectorV.x, y: vectorV.y },
+                  { x: proj.x, y: proj.y },
+                ],
+                borderColor: "#9ca3af",
+                backgroundColor: "#9ca3af",
+                borderWidth: 2,
+                pointRadius: 0,
+                borderDash: [5, 5],
+                showArrow: false,
+                fill: false,
+                showLine: true,
+                tension: 0,
+              },
+            ];
+            this.charts.dot.update();
+          }
         }
 
         function updatePage() {
           updateCalculations();
-          updateCharts();
+          chartManager.updateCharts(vectorV, vectorW);
           update3D();
         }
 
@@ -777,102 +901,8 @@
           }
         }
 
-        function updateCharts() {
-          // Addition Chart
-          const vPlusW = { x: vectorV.x + vectorW.x, y: vectorV.y + vectorW.y };
-          charts.addition.data.datasets = [
-            createVectorDataset(vectorV, "#fca5a5", vectorW, [5, 5]),
-            createVectorDataset(vectorW, "#86efac", vectorV, [5, 5]),
-            createVectorDataset(vectorV, "#ef4444"),
-            createVectorDataset(vectorW, "#10b981"),
-            createVectorDataset(vPlusW, "#3b82f6"),
-          ];
-          charts.addition.update();
-
-          // Subtraction Chart
-          const vMinusW = { x: vectorV.x - vectorW.x, y: vectorV.y - vectorW.y };
-          charts.subtraction.data.datasets = [
-            createVectorDataset(vectorV, "#ef4444"),
-            createVectorDataset(vectorW, "#10b981"),
-            createVectorDataset(vMinusW, "#3b82f6", vectorW),
-          ];
-          charts.subtraction.update();
-
-          // Scalar Multiplication Chart
-          const scalar2v = { x: vectorV.x * 2, y: vectorV.y * 2 };
-          const scalarNegV = { x: vectorV.x * -1.5, y: vectorV.y * -1.5 };
-          charts.scalar.data.datasets = [
-            createVectorDataset(vectorV, "#fca5a5", { x: 0, y: 0 }, [5, 5]),
-            createVectorDataset(scalar2v, "#3b82f6"),
-            createVectorDataset(scalarNegV, "#6366f1"),
-          ];
-          charts.scalar.update();
-
-          // Dot Product Chart
-          const dot = vectorV.x * vectorW.x + vectorV.y * vectorW.y;
-          const wMagSq = vectorW.x ** 2 + vectorW.y ** 2;
-          const projScalar = wMagSq === 0 ? 0 : dot / wMagSq;
-          const proj = { x: vectorW.x * projScalar, y: vectorW.y * projScalar };
-          charts.dot.data.datasets = [
-            // Vector V (red) - no dots
-            {
-              data: [
-                { x: 0, y: 0 },
-                { x: vectorV.x, y: vectorV.y },
-              ],
-              borderColor: "#ef4444",
-              borderWidth: 3,
-              pointRadius: 0,
-              showArrow: true,
-              showLine: true,
-              fill: false,
-            },
-            // Vector W (green) - no dots
-            {
-              data: [
-                { x: 0, y: 0 },
-                { x: vectorW.x, y: vectorW.y },
-              ],
-              borderColor: "#10b981",
-              borderWidth: 3,
-              pointRadius: 0,
-              showArrow: true,
-              showLine: true,
-              fill: false,
-            },
-            // Projection (blue dashed) - no dots
-            {
-              data: [
-                { x: 0, y: 0 },
-                { x: proj.x, y: proj.y },
-              ],
-              borderColor: "#0066ff",
-              borderWidth: 5,
-              pointRadius: 0,
-              borderDash: [10, 5],
-              showArrow: true,
-              showLine: true,
-              fill: false,
-            },
-            // Perpendicular drop (gray dashed) - no dots
-            {
-              data: [
-                { x: vectorV.x, y: vectorV.y },
-                { x: proj.x, y: proj.y },
-              ],
-              borderColor: "#6b7280",
-              borderWidth: 3,
-              pointRadius: 0,
-              borderDash: [6, 6],
-              showArrow: false,
-              showLine: true,
-              fill: false,
-            },
-          ];
-          charts.dot.update();
-        }
-
-        createCharts();
+        // Initialize components
+        chartManager = new ChartManager();
         setup3D();
         updatePage();
 
@@ -890,23 +920,157 @@
 
         const navLinks = document.querySelectorAll(".nav-link");
         const sections = document.querySelectorAll("main section");
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                const id = entry.target.getAttribute("id");
-                navLinks.forEach((link) => {
-                  link.classList.remove("active");
-                  if (link.getAttribute("href") === `#${id}`) {
-                    link.classList.add("active");
-                  }
-                });
+
+        // Clean Navigation Highlighting System
+        class NavigationController {
+          constructor(navLinks, sections) {
+            this.navLinks = navLinks;
+            this.sections = sections;
+            this.hasScrolled = false;
+            this.scrollDetectionDisabled = false;
+
+            this.init();
+          }
+
+          init() {
+            // Initial setup
+            this.highlightSection("introduction");
+            window.scrollTo(0, 0);
+
+            // Bind events
+            this.bindScrollEvents();
+            this.bindClickEvents();
+          }
+
+          // Single source of truth for highlighting
+          highlightSection(sectionId) {
+            this.navLinks.forEach((link) => link.classList.remove("active"));
+            const activeLink = document.querySelector(`a[href="#${sectionId}"]`);
+            if (activeLink) {
+              activeLink.classList.add("active");
+            }
+          }
+
+          // Throttle function for performance
+          throttle(func, delay) {
+            let timeoutId;
+            let lastExecTime = 0;
+            return (...args) => {
+              const currentTime = Date.now();
+              if (currentTime - lastExecTime > delay) {
+                func.apply(this, args);
+                lastExecTime = currentTime;
+              } else {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                  func.apply(this, args);
+                  lastExecTime = Date.now();
+                }, delay - (currentTime - lastExecTime));
+              }
+            };
+          }
+
+          // Determine active section based on scroll position
+          getActiveSectionFromScroll() {
+            const scrollTop = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+
+            // Special case: top of page
+            if (scrollTop === 0) {
+              return "introduction";
+            }
+
+            // Special case: bottom of page
+            if (scrollTop + windowHeight >= documentHeight - 10) {
+              return this.sections[this.sections.length - 1].getAttribute("id");
+            }
+
+            // Find section at top of viewport
+            let activeSection = null;
+            this.sections.forEach((section) => {
+              const rect = section.getBoundingClientRect();
+              const sectionTop = scrollTop + rect.top;
+
+              if (sectionTop <= scrollTop + 100) {
+                activeSection = section.getAttribute("id");
               }
             });
-          },
-          { rootMargin: "-40% 0px -60% 0px", threshold: 0.1 }
-        );
-        sections.forEach((section) => observer.observe(section));
+
+            return activeSection;
+          }
+
+          // Handle scroll-based highlighting
+          handleScroll() {
+            if (this.scrollDetectionDisabled) return;
+
+            const activeSection = this.getActiveSectionFromScroll();
+            if (activeSection) {
+              this.highlightSection(activeSection);
+            }
+          }
+
+          // Handle navigation clicks
+          handleNavClick(event) {
+            const link = event.currentTarget;
+            const targetId = link.getAttribute("href").substring(1);
+
+            // Temporarily disable scroll detection
+            this.scrollDetectionDisabled = true;
+            this.highlightSection(targetId);
+
+            // Re-enable after navigation completes
+            setTimeout(() => {
+              this.scrollDetectionDisabled = false;
+            }, 1000);
+          }
+
+          // Activate scroll detection after first scroll
+          activateScrollDetection() {
+            if (!this.hasScrolled) {
+              this.hasScrolled = true;
+              const throttledHandler = this.throttle(this.handleScroll.bind(this), 16); // ~60fps
+              window.addEventListener("scroll", throttledHandler);
+            }
+          }
+
+          // Bind all event listeners
+          bindScrollEvents() {
+            // One-time activation
+            window.addEventListener("scroll", this.activateScrollDetection.bind(this), {
+              once: true,
+            });
+          }
+
+          bindClickEvents() {
+            this.navLinks.forEach((link) => {
+              link.addEventListener("click", this.handleNavClick.bind(this));
+            });
+          }
+        }
+
+        // Initialize the navigation system
+        const navigationController = new NavigationController(navLinks, sections);
+
+        // Reset button functionality
+        document.getElementById("reset-button").addEventListener("click", () => {
+          // Reset to default values and trigger change events
+          const vxSlider = document.getElementById("vx");
+          const vySlider = document.getElementById("vy");
+          const wxSlider = document.getElementById("wx");
+          const wySlider = document.getElementById("wy");
+
+          vxSlider.value = 2;
+          vySlider.value = 4;
+          wxSlider.value = 5;
+          wySlider.value = 1;
+
+          // Trigger input events to update displays and charts
+          vxSlider.dispatchEvent(new Event("input"));
+          vySlider.dispatchEvent(new Event("input"));
+          wxSlider.dispatchEvent(new Event("input"));
+          wySlider.dispatchEvent(new Event("input"));
+        });
       });
     </script>
   </body>
