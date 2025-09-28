@@ -151,6 +151,24 @@ Dot products are at the heart of many ML operations:
 \end{itemize}
 Intuitively, the dot product measures \textbf{alignment}—how much one vector “projects” onto another, which is essential for similarity and weighted summation.
 
+\subsubsection*{Amplified Intuition: Alignment \& Projection in ML}
+Let $\vec a$ and $\vec b$ be nonzero vectors with angle $\theta$ between them. The dot product ties \textbf{angle} and \textbf{length} into a single scalar:
+\[
+\vec a \cdot \vec b = |\vec a|\,|\vec b|\,\cos\theta.
+\]
+\paragraph{Projection view.} The length of the projection of $\vec b$ onto the line spanned by $\vec a$ is $|\vec b|\cos\theta$. Thus
+\[
+\vec a \cdot \vec b = |\vec a| \; \big(\text{length of } \text{proj}_{\vec a} \vec b\big),
+\]
+so the dot product is literally ``how much of $\vec b$ lies along $\vec a$," scaled by the length of $\vec a$. It is largest when $\theta=0^\circ$, zero at $90^\circ$, and negative when directions oppose.
+\paragraph{Similarity.} Because it grows with alignment and shrinks with orthogonality, the dot product (or the normalized form, cosine similarity)
+\[
+\cos\theta \;=\; \frac{\vec a \cdot \vec b}{\|\vec a\|\,\|\vec b\|}
+\]
+is a natural measure of \textbf{semantic similarity} for embeddings (texts, images, users/items). Small angle $\Rightarrow$ high similarity; orthogonal $\Rightarrow$ unrelated; opposite $\Rightarrow$ dissimilar/contrasting.
+\paragraph{Weighted summation / neurons.} A linear neuron computes $z=\vec w\cdot\vec x+b$. Here $\vec w$ defines a \emph{preferred direction} in feature space. If $\vec x$ aligns with $\vec w$, $z$ is large (strong evidence); if $\vec x$ is orthogonal to $\vec w$, $z\approx 0$ (no evidence); if anti-aligned, $z$ is negative (counter-evidence). The neuron is thus a \textbf{directional detector}.
+\paragraph{Why it works.} The dot product respects both magnitude and angle, converting geometric alignment into a single scalar that we can rank, threshold, and optimize. This makes it the core ingredient in similarity search, attention scoring, and every linear layer.
+
 \subsection{Cross Product ($\vec{a} \times \vec{b}$)}
 
 The cross product is an operation on two vectors in 3D space that results in a new \textbf{vector}.
