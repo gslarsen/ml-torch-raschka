@@ -1,4 +1,6 @@
 # coding: utf-8
+import sys
+import os
 import numpy as np
 
 import pandas as pd
@@ -6,26 +8,27 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from urllib.error import HTTPError
 
+
+current_wd = os.getcwd()
+current_script_dir = os.path.dirname(__file__)
+
+# Change working directory to the script location to save figures in current directory
+if current_wd != current_script_dir:
+    os.chdir(current_script_dir)
+    print(f"Changed Working Directory to Script Location: {os.getcwd()}")
+
 # # Machine Learning with PyTorch and Scikit-Learn
 # # -- Code Examples
 
 # ## Package version checks
+# If ran script like: $ python ch02/ch02.py, add parent dir to sys.path to access check_packages
+if sys.path[0] == os.getcwd():
+    sys.path.insert(0, "..")
+print(f"sys.path: {sys.path}")
+from python_environment_check import check_packages
 
-# Add folder to path in order to load from the check_packages.py script:
-
-
-# sys.path.insert(0, '..')
-
-
-# Check recommended package versions:
-
-
-# d = {
-#     'numpy': '1.21.2',
-#     'matplotlib': '3.4.3',
-#     'pandas': '1.3.2'
-# }
-# check_packages(d)
+d = {"numpy": "1.21.2", "matplotlib": "3.4.3", "pandas": "1.3.2"}
+check_packages(d)
 
 
 # # Chapter 2 - Training Machine Learning Algorithms for Classification
